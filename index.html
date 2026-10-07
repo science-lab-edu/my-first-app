@@ -1,11 +1,516 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ja">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=, initial-scale=1.0">
-    <title>Document</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#101a35">
+  <title>Skybound - ちいさな冒険</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: #101a35;
+      color: #f5f7ff;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      min-height: 100vh;
+      margin: 0;
+      padding: 28px 16px;
+      display: grid;
+      place-items: center;
+      background:
+        radial-gradient(ellipse at 50% 0%, #263e70 0, transparent 55%),
+        #101a35;
+    }
+
+    main { width: min(100%, 960px); }
+
+    .topline {
+      display: flex;
+      justify-content: space-between;
+      align-items: end;
+      gap: 16px;
+      margin: 0 2px 14px;
+    }
+
+    .eyebrow {
+      margin: 0 0 4px;
+      color: #91a8db;
+      font-size: .72rem;
+      font-weight: 800;
+      letter-spacing: .18em;
+      text-transform: uppercase;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(1.45rem, 4vw, 2rem);
+      letter-spacing: -.04em;
+    }
+
+    .hint {
+      margin: 0;
+      color: #b5c3e3;
+      font-size: .85rem;
+      text-align: right;
+    }
+
+    .game-shell {
+      position: relative;
+      overflow: hidden;
+      border: 1px solid #50638c;
+      border-radius: 18px;
+      background: #91c8ec;
+      box-shadow: 0 24px 80px #050b1c99;
+    }
+
+    canvas {
+      display: block;
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      touch-action: none;
+    }
+
+    .hud {
+      position: absolute;
+      inset: 14px 16px auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      pointer-events: none;
+      color: #14264a;
+      font-size: .78rem;
+      font-weight: 800;
+      text-shadow: 0 1px #ffffff99;
+    }
+
+    .hud span {
+      padding: 7px 11px;
+      border: 1px solid #ffffff9c;
+      border-radius: 999px;
+      background: #ffffffa8;
+      backdrop-filter: blur(8px);
+    }
+
+    .message {
+      position: absolute;
+      inset: 0;
+      display: grid;
+      place-items: center;
+      padding: 20px;
+      background: #101a356e;
+      text-align: center;
+    }
+
+    .message[hidden] { display: none; }
+
+    .card {
+      max-width: 360px;
+      padding: 25px 28px;
+      border: 1px solid #ffffff55;
+      border-radius: 18px;
+      background: #152342ed;
+      box-shadow: 0 14px 50px #08112666;
+    }
+
+    .card h2 { margin: 0 0 8px; font-size: 1.6rem; }
+    .card p { margin: 0 0 18px; color: #c1cde7; line-height: 1.6; }
+
+    button {
+      border: 0;
+      border-radius: 12px;
+      padding: 11px 20px;
+      background: #ffd166;
+      color: #192443;
+      font: inherit;
+      font-weight: 850;
+      cursor: pointer;
+    }
+
+    button:hover { background: #ffe29a; }
+    button:focus-visible { outline: 3px solid white; outline-offset: 3px; }
+
+    .mobile-controls {
+      display: none;
+      justify-content: space-between;
+      gap: 12px;
+      margin-top: 12px;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    .control-group { display: flex; gap: 10px; }
+    .mobile-controls button {
+      width: 64px;
+      height: 54px;
+      padding: 0;
+      border: 1px solid #7182a7;
+      background: #1b2a4b;
+      color: white;
+      font-size: 1.2rem;
+      touch-action: none;
+    }
+
+    .mobile-controls button:active { background: #344a77; }
+
+    .footer {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      margin: 13px 3px 0;
+      color: #99aacc;
+      font-size: .76rem;
+    }
+
+    @media (max-width: 650px) {
+      body { padding: 18px 12px; }
+      .topline { align-items: start; flex-direction: column; gap: 6px; }
+      .hint { text-align: left; }
+      .mobile-controls { display: flex; }
+      .footer { font-size: .69rem; }
+    }
+  </style>
 </head>
 <body>
-    ようこそ私のページへ！
+  <main>
+    <header class="topline">
+      <div>
+        <p class="eyebrow">A tiny platform adventure</p>
+        <h1>Skybound <span aria-hidden="true">☁️</span></h1>
+      </div>
+      <p class="hint">足場をわたり、旗のところまで進もう。</p>
+    </header>
+
+    <section class="game-shell" aria-label="横スクロールアクションゲーム">
+      <canvas id="game" aria-label="Skyboundのゲーム画面"></canvas>
+      <div class="hud" aria-live="polite">
+        <span id="progress">▶ START</span>
+        <span id="lives">♥ ♥ ♥</span>
+      </div>
+      <div class="message" id="message">
+        <div class="card">
+          <h2 id="message-title">冒険に出発！</h2>
+          <p id="message-text">ジャンプで足場をわたり、ゴールの旗を目指そう。</p>
+          <button id="start-button" type="button">ゲームスタート</button>
+        </div>
+      </div>
+    </section>
+
+    <nav class="mobile-controls" aria-label="タッチ操作">
+      <div class="control-group">
+        <button type="button" data-key="ArrowLeft" aria-label="左へ">←</button>
+        <button type="button" data-key="ArrowRight" aria-label="右へ">→</button>
+      </div>
+      <button type="button" data-key="Space" aria-label="ジャンプ">↑</button>
+    </nav>
+
+    <div class="footer">
+      <span>操作: ← → / A D で移動 · Space / ↑ でジャンプ</span>
+      <span>敵に触れるとライフが減ります</span>
+    </div>
+  </main>
+
+  <script>
+    (() => {
+      const canvas = document.querySelector("#game");
+      const ctx = canvas.getContext("2d");
+      const message = document.querySelector("#message");
+      const messageTitle = document.querySelector("#message-title");
+      const messageText = document.querySelector("#message-text");
+      const startButton = document.querySelector("#start-button");
+      const progressLabel = document.querySelector("#progress");
+      const livesLabel = document.querySelector("#lives");
+
+      const worldWidth = 2800;
+      const worldHeight = 540;
+      const platforms = [
+        { x: 0, y: 440, w: 500, h: 100 },
+        { x: 590, y: 440, w: 390, h: 100 },
+        { x: 1080, y: 440, w: 390, h: 100 },
+        { x: 1580, y: 440, w: 410, h: 100 },
+        { x: 2110, y: 440, w: 690, h: 100 },
+        { x: 250, y: 345, w: 150, h: 22 },
+        { x: 720, y: 340, w: 150, h: 22 },
+        { x: 1190, y: 335, w: 165, h: 22 },
+        { x: 1690, y: 340, w: 150, h: 22 },
+        { x: 2220, y: 330, w: 165, h: 22 }
+      ];
+      const enemySpawns = [
+        { x: 360, y: 410, min: 300, max: 465 },
+        { x: 805, y: 310, min: 720, max: 850 },
+        { x: 1300, y: 410, min: 1130, max: 1410 },
+        { x: 1780, y: 310, min: 1690, max: 1810 },
+        { x: 2310, y: 300, min: 2220, max: 2360 },
+        { x: 2630, y: 410, min: 2460, max: 2730 }
+      ];
+      const keys = new Set();
+      const player = { x: 70, y: 390, w: 30, h: 42, vx: 0, vy: 0, grounded: false };
+      let enemies = [];
+      let cameraX = 0;
+      let lives = 3;
+      let running = false;
+      let lastTime = 0;
+      let elapsed = 0;
+      let invulnerable = 0;
+
+      function resizeCanvas() {
+        const rect = canvas.getBoundingClientRect();
+        const dpr = Math.min(window.devicePixelRatio || 1, 2);
+        canvas.width = Math.round(rect.width * dpr);
+        canvas.height = Math.round(rect.height * dpr);
+        ctx.setTransform(canvas.width / (rect.width || 1), 0, 0, canvas.height / (rect.height || 1), 0, 0);
+        draw();
+      }
+
+      function resetGame() {
+        player.x = 70;
+        player.y = 390;
+        player.vx = 0;
+        player.vy = 0;
+        player.grounded = false;
+        cameraX = 0;
+        lives = 3;
+        invulnerable = 0;
+        elapsed = 0;
+        enemies = enemySpawns.map((enemy, index) => ({
+          ...enemy,
+          x: enemy.x,
+          y: enemy.y,
+          w: 32,
+          h: 30,
+          direction: index % 2 === 0 ? 1 : -1
+        }));
+        updateHud();
+      }
+
+      function updateHud() {
+        progressLabel.textContent = `${Math.min(100, Math.floor((player.x / (worldWidth - 100)) * 100))}%`;
+        livesLabel.textContent = `${"♥ ".repeat(lives)}${"♡ ".repeat(3 - lives)}`.trim();
+      }
+
+      function showMessage(title, text, buttonText) {
+        running = false;
+        messageTitle.textContent = title;
+        messageText.textContent = text;
+        startButton.textContent = buttonText;
+        message.hidden = false;
+      }
+
+      function startGame() {
+        resetGame();
+        message.hidden = true;
+        running = true;
+        lastTime = performance.now();
+        requestAnimationFrame(loop);
+      }
+
+      function intersects(a, b) {
+        return a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y;
+      }
+
+      function update(dt) {
+        elapsed += dt;
+        invulnerable = Math.max(0, invulnerable - dt);
+        const left = keys.has("ArrowLeft") || keys.has("KeyA");
+        const right = keys.has("ArrowRight") || keys.has("KeyD");
+        player.vx = (Number(right) - Number(left)) * 270;
+
+        if ((keys.has("Space") || keys.has("ArrowUp") || keys.has("KeyW")) && player.grounded) {
+          player.vy = -650;
+          player.grounded = false;
+        }
+
+        const oldX = player.x;
+        player.x = Math.max(0, Math.min(worldWidth - player.w, player.x + player.vx * dt));
+        for (const platform of platforms) {
+          if (intersects(player, platform) && player.y + player.h > platform.y + 8) {
+            player.x = oldX;
+            break;
+          }
+        }
+
+        const oldBottom = player.y + player.h;
+        player.vy = Math.min(900, player.vy + 1750 * dt);
+        player.y += player.vy * dt;
+        player.grounded = false;
+        for (const platform of platforms) {
+          if (player.vy >= 0 && oldBottom <= platform.y && player.y + player.h >= platform.y &&
+              player.x + player.w > platform.x && player.x < platform.x + platform.w) {
+            player.y = platform.y - player.h;
+            player.vy = 0;
+            player.grounded = true;
+          }
+        }
+
+        for (const enemy of enemies) {
+          enemy.x += enemy.direction * 75 * dt;
+          if (enemy.x < enemy.min || enemy.x + enemy.w > enemy.max) enemy.direction *= -1;
+          if (invulnerable === 0 && intersects(player, enemy)) {
+            lives -= 1;
+            invulnerable = 1.2;
+            player.x = Math.max(0, player.x - 90);
+            player.vy = -300;
+            updateHud();
+            if (lives <= 0) {
+              showMessage("もう一度チャレンジ！", "敵にぶつかってしまった。足場を見ながら進もう。", "リトライ");
+              return;
+            }
+          }
+        }
+
+        if (player.y > worldHeight + 30) {
+          showMessage("落ちてしまった！", "ジャンプのタイミングを変えて、もう一度進もう。", "リトライ");
+          return;
+        }
+        if (player.x > worldWidth - 120) {
+          showMessage("ゴール！", `冒険クリア！ タイムは ${elapsed.toFixed(1)} 秒。`, "もう一度遊ぶ");
+          return;
+        }
+
+        const viewWidth = canvas.clientWidth;
+        cameraX = Math.max(0, Math.min(worldWidth - viewWidth, player.x - viewWidth * 0.36));
+        updateHud();
+      }
+
+      function draw() {
+        const width = canvas.clientWidth;
+        const height = canvas.clientHeight;
+        if (!width || !height) return;
+        const scale = height / worldHeight;
+        const viewWidth = width / scale;
+        cameraX = Math.max(0, Math.min(worldWidth - viewWidth, cameraX));
+        ctx.clearRect(0, 0, width, height);
+        ctx.save();
+        ctx.scale(scale, scale);
+        ctx.translate(-cameraX, 0);
+
+        const sky = ctx.createLinearGradient(0, 0, 0, worldHeight);
+        sky.addColorStop(0, "#8ed5f2");
+        sky.addColorStop(1, "#d6f2f0");
+        ctx.fillStyle = sky;
+        ctx.fillRect(cameraX, 0, viewWidth, worldHeight);
+
+        for (let i = 0; i < 9; i += 1) {
+          const x = i * 380 + 50 - (cameraX * 0.22) % 380;
+          drawCloud(x, 95 + (i % 3) * 52);
+        }
+
+        ctx.fillStyle = "#80b8a3";
+        ctx.beginPath();
+        ctx.moveTo(cameraX, 435);
+        for (let x = Math.floor(cameraX / 260) * 260; x <= cameraX + viewWidth + 300; x += 260) {
+          ctx.quadraticCurveTo(x + 130, 330 + (Math.floor(x / 260) % 2) * 35, x + 260, 435);
+        }
+        ctx.lineTo(cameraX + viewWidth, worldHeight);
+        ctx.lineTo(cameraX, worldHeight);
+        ctx.fill();
+
+        for (const platform of platforms) {
+          ctx.fillStyle = "#60463e";
+          ctx.fillRect(platform.x, platform.y, platform.w, platform.h);
+          ctx.fillStyle = "#69b86c";
+          ctx.fillRect(platform.x, platform.y, platform.w, 11);
+          ctx.fillStyle = "#91d580";
+          for (let x = platform.x + 12; x < platform.x + platform.w; x += 34) {
+            ctx.fillRect(x, platform.y + 11, 4, Math.min(12, platform.h - 11));
+          }
+        }
+
+        drawGoal();
+        for (const enemy of enemies) drawEnemy(enemy);
+        if (invulnerable === 0 || Math.floor(performance.now() / 90) % 2 === 0) drawPlayer();
+
+        ctx.restore();
+      }
+
+      function drawCloud(x, y) {
+        ctx.fillStyle = "#ffffffbd";
+        ctx.beginPath();
+        ctx.arc(x, y + 15, 21, 0, Math.PI * 2);
+        ctx.arc(x + 25, y, 27, 0, Math.PI * 2);
+        ctx.arc(x + 53, y + 15, 20, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      function drawPlayer() {
+        ctx.fillStyle = "#243a69";
+        ctx.fillRect(player.x + 3, player.y + 13, player.w - 6, player.h - 13);
+        ctx.fillStyle = "#ffcf70";
+        ctx.fillRect(player.x + 6, player.y, player.w - 12, 20);
+        ctx.fillStyle = "#ffffff";
+        ctx.fillRect(player.x + 17, player.y + 7, 5, 6);
+        ctx.fillStyle = "#1c2b49";
+        ctx.fillRect(player.x + 19, player.y + 9, 3, 4);
+        ctx.fillStyle = "#e98965";
+        ctx.fillRect(player.x + 2, player.y + 37, 12, 5);
+        ctx.fillRect(player.x + 17, player.y + 37, 12, 5);
+      }
+
+      function drawEnemy(enemy) {
+        ctx.fillStyle = "#c94f63";
+        ctx.beginPath();
+        ctx.roundRect(enemy.x, enemy.y + 5, enemy.w, enemy.h - 5, 10);
+        ctx.fill();
+        ctx.fillStyle = "#fff4e8";
+        ctx.fillRect(enemy.x + 8, enemy.y + 12, 5, 7);
+        ctx.fillRect(enemy.x + 20, enemy.y + 12, 5, 7);
+        ctx.fillStyle = "#522d4a";
+        ctx.fillRect(enemy.x + 10, enemy.y + 14, 3, 4);
+        ctx.fillRect(enemy.x + 22, enemy.y + 14, 3, 4);
+      }
+
+      function drawGoal() {
+        ctx.fillStyle = "#f5f1db";
+        ctx.fillRect(worldWidth - 125, 322, 7, 118);
+        ctx.fillStyle = "#ef6575";
+        ctx.beginPath();
+        ctx.moveTo(worldWidth - 118, 325);
+        ctx.lineTo(worldWidth - 62, 341);
+        ctx.lineTo(worldWidth - 118, 360);
+        ctx.closePath();
+        ctx.fill();
+        ctx.fillStyle = "#f5f1db";
+        ctx.beginPath();
+        ctx.arc(worldWidth - 121.5, 319, 7, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      function loop(time) {
+        if (!running) return;
+        const dt = Math.min((time - lastTime) / 1000, 0.04);
+        lastTime = time;
+        update(dt);
+        draw();
+        if (running) requestAnimationFrame(loop);
+      }
+
+      startButton.addEventListener("click", startGame);
+      window.addEventListener("resize", resizeCanvas);
+      window.addEventListener("keydown", (event) => {
+        if (["ArrowLeft", "ArrowRight", "ArrowUp", "Space"].includes(event.code)) event.preventDefault();
+        keys.add(event.code);
+      });
+      window.addEventListener("keyup", (event) => keys.delete(event.code));
+      window.addEventListener("blur", () => keys.clear());
+
+      document.querySelectorAll("[data-key]").forEach((button) => {
+        const key = button.dataset.key;
+        button.addEventListener("pointerdown", (event) => {
+          event.preventDefault();
+          button.setPointerCapture(event.pointerId);
+          keys.add(key);
+        });
+        button.addEventListener("pointerup", () => keys.delete(key));
+        button.addEventListener("pointercancel", () => keys.delete(key));
+        button.addEventListener("lostpointercapture", () => keys.delete(key));
+      });
+
+      resetGame();
+      resizeCanvas();
+    })();
+  </script>
 </body>
 </html>
