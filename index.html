@@ -3,13 +3,13 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#101a35">
+  <meta name="theme-color" content="#211832">
   <title>Skybound - ちいさな冒険</title>
   <style>
     :root {
       color-scheme: dark;
       font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      background: #080b20;
+      background: #211832;
       color: #f5f7ff;
     }
 
@@ -22,9 +22,7 @@
       display: grid;
       place-items: center;
       background:
-        radial-gradient(ellipse at 50% 0%, #29205c 0, transparent 55%),
-        radial-gradient(ellipse at 85% 80%, #102c49 0, transparent 42%),
-        #080b20;
+        linear-gradient(180deg, #392544 0, #211832 55%, #151526 100%);
     }
 
     main { width: min(100%, 960px); }
@@ -39,7 +37,7 @@
 
     .eyebrow {
       margin: 0 0 4px;
-      color: #91a8db;
+      color: #e4b567;
       font-size: .72rem;
       font-weight: 800;
       letter-spacing: .18em;
@@ -54,7 +52,7 @@
 
     .hint {
       margin: 0;
-      color: #b5c3e3;
+      color: #c9b8a2;
       font-size: .85rem;
       text-align: right;
     }
@@ -62,16 +60,17 @@
     .game-shell {
       position: relative;
       overflow: hidden;
-      border: 1px solid #4a58a8;
-      border-radius: 18px;
-      background: #11122f;
-      box-shadow: 0 0 0 1px #42f5e933, 0 0 28px #42f5e933, 0 24px 80px #050b1c99;
+      border: 4px solid #e4b567;
+      border-radius: 0;
+      background: #211832;
+      box-shadow: 0 0 0 4px #151526, 8px 8px 0 #0d0d18;
     }
 
     canvas {
       display: block;
       width: 100%;
       aspect-ratio: 16 / 9;
+      image-rendering: pixelated;
       touch-action: none;
     }
 
@@ -82,19 +81,18 @@
       align-items: center;
       justify-content: space-between;
       pointer-events: none;
-      color: #e9faff;
+      color: #fff0c2;
       font-size: .78rem;
       font-weight: 800;
-      text-shadow: 0 0 9px #42f5e9b3;
+      text-shadow: 2px 2px #151526;
     }
 
     .hud span {
       padding: 7px 11px;
-      border: 1px solid #52f6e999;
-      border-radius: 999px;
-      background: #101c3bdb;
-      box-shadow: 0 0 14px #42f5e933, inset 0 0 12px #42f5e90d;
-      backdrop-filter: blur(8px);
+      border: 2px solid #e4b567;
+      border-radius: 0;
+      background: #211832;
+      box-shadow: 3px 3px 0 #0d0d18;
     }
 
     .message {
@@ -103,7 +101,7 @@
       display: grid;
       place-items: center;
       padding: 20px;
-      background: #080b20b8;
+      background: #151526dd;
       text-align: center;
     }
 
@@ -112,28 +110,28 @@
     .card {
       max-width: 360px;
       padding: 25px 28px;
-      border: 1px solid #42f5e977;
-      border-radius: 18px;
-      background: #10152eee;
-      box-shadow: 0 0 24px #a14cff55, 0 14px 50px #08112699;
+      border: 4px solid #e4b567;
+      border-radius: 0;
+      background: #211832;
+      box-shadow: 6px 6px 0 #0d0d18;
     }
 
-    .card h2 { margin: 0 0 8px; color: #80fff1; font-size: 1.6rem; text-shadow: 0 0 14px #42f5e9a6; }
-    .card p { margin: 0 0 18px; color: #c7d6f4; line-height: 1.6; }
+    .card h2 { margin: 0 0 8px; color: #f6d365; font-size: 1.6rem; text-shadow: 2px 2px #70445a; }
+    .card p { margin: 0 0 18px; color: #e3d3bd; line-height: 1.6; }
 
     button {
       border: 0;
-      border-radius: 12px;
+      border-radius: 0;
       padding: 11px 20px;
-      background: #42f5e9;
-      color: #09142c;
-      box-shadow: 0 0 18px #42f5e980;
+      background: #f6d365;
+      color: #21183a;
+      box-shadow: 3px 3px 0 #70445a;
       font: inherit;
       font-weight: 850;
       cursor: pointer;
     }
 
-    button:hover { background: #8efff7; box-shadow: 0 0 26px #42f5e9cc; }
+    button:hover { background: #ffe99a; box-shadow: 3px 3px 0 #70445a; }
     button:focus-visible { outline: 3px solid white; outline-offset: 3px; }
 
     .mobile-controls {
@@ -150,22 +148,23 @@
       width: 64px;
       height: 54px;
       padding: 0;
-      border: 1px solid #42f5e988;
-      background: #111b3a;
+      border: 2px solid #e4b567;
+      border-radius: 0;
+      background: #211832;
       color: white;
       font-size: 1.2rem;
-      box-shadow: inset 0 0 16px #42f5e91a, 0 0 12px #42f5e922;
+      box-shadow: 3px 3px 0 #0d0d18;
       touch-action: none;
     }
 
-    .mobile-controls button:active { background: #243c6b; box-shadow: 0 0 18px #42f5e980; }
+    .mobile-controls button:active { background: #70445a; box-shadow: 1px 1px 0 #0d0d18; }
 
     .footer {
       display: flex;
       justify-content: space-between;
       gap: 12px;
       margin: 13px 3px 0;
-      color: #8e9dc6;
+      color: #b9a88f;
       font-size: .76rem;
     }
 
@@ -182,10 +181,10 @@
   <main>
     <header class="topline">
       <div>
-        <p class="eyebrow">A tiny platform adventure</p>
+        <p class="eyebrow">PIXEL QUEST · 16-BIT ADVENTURE</p>
         <h1>Skybound <span aria-hidden="true">☁️</span></h1>
       </div>
-      <p class="hint">足場をわたり、旗のところまで進もう。</p>
+      <p class="hint">敵はジャンプで踏んで倒そう！</p>
     </header>
 
     <section class="game-shell" aria-label="横スクロールアクションゲーム">
@@ -193,11 +192,12 @@
       <div class="hud" aria-live="polite">
         <span id="progress">▶ START</span>
         <span id="lives">♥ ♥ ♥</span>
+        <span id="defeats">撃破 0</span>
       </div>
       <div class="message" id="message">
         <div class="card">
           <h2 id="message-title">冒険に出発！</h2>
-          <p id="message-text">ジャンプで足場をわたり、ゴールの旗を目指そう。</p>
+          <p id="message-text">ジャンプで足場をわたり、敵は上から踏んで倒そう！</p>
           <button id="start-button" type="button">ゲームスタート</button>
         </div>
       </div>
@@ -213,7 +213,7 @@
 
     <div class="footer">
       <span>操作: ← → / A D で移動 · Space / ↑ でジャンプ</span>
-      <span>敵に触れるとライフが減ります</span>
+      <span>敵は上から踏むと撃破 · 横から触れるとライフ減少</span>
     </div>
   </main>
 
@@ -227,6 +227,7 @@
       const startButton = document.querySelector("#start-button");
       const progressLabel = document.querySelector("#progress");
       const livesLabel = document.querySelector("#lives");
+      const defeatsLabel = document.querySelector("#defeats");
 
       const worldWidth = 2800;
       const worldHeight = 540;
@@ -260,12 +261,14 @@
       let elapsed = 0;
       let invulnerable = 0;
       let particles = [];
+      let defeats = 0;
 
       function resizeCanvas() {
         const rect = canvas.getBoundingClientRect();
         const dpr = Math.min(window.devicePixelRatio || 1, 2);
-        canvas.width = Math.round(rect.width * dpr);
-        canvas.height = Math.round(rect.height * dpr);
+        const pixelScale = 3;
+        canvas.width = Math.max(1, Math.round(rect.width * dpr / pixelScale));
+        canvas.height = Math.max(1, Math.round(rect.height * dpr / pixelScale));
         ctx.setTransform(canvas.width / (rect.width || 1), 0, 0, canvas.height / (rect.height || 1), 0, 0);
         draw();
       }
@@ -281,6 +284,7 @@
         invulnerable = 0;
         elapsed = 0;
         particles = [];
+        defeats = 0;
         enemies = enemySpawns.map((enemy, index) => ({
           ...enemy,
           x: enemy.x,
@@ -296,6 +300,7 @@
       function updateHud() {
         progressLabel.textContent = `${Math.min(100, Math.floor((player.x / (worldWidth - 100)) * 100))}%`;
         livesLabel.textContent = `${"♥ ".repeat(lives)}${"♡ ".repeat(3 - lives)}`.trim();
+        defeatsLabel.textContent = `撃破 ${defeats}`;
       }
 
       function showMessage(title, text, buttonText) {
@@ -364,10 +369,24 @@
           }
         }
 
-        for (const enemy of enemies) {
+        for (let i = enemies.length - 1; i >= 0; i -= 1) {
+          const enemy = enemies[i];
           enemy.x += enemy.direction * 75 * dt;
           if (enemy.x < enemy.min || enemy.x + enemy.w > enemy.max) enemy.direction *= -1;
-          if (invulnerable === 0 && intersects(player, enemy)) {
+          if (!intersects(player, enemy)) continue;
+
+          if (player.vy >= 0 && oldBottom <= enemy.y + 10 && player.y + player.h >= enemy.y) {
+            player.y = enemy.y - player.h;
+            player.vy = -430;
+            player.grounded = false;
+            enemies.splice(i, 1);
+            defeats += 1;
+            spawnParticles(enemy.x + enemy.w / 2, enemy.y + enemy.h / 2, 14, "#f6d365", 110, 45);
+            updateHud();
+            continue;
+          }
+
+          if (invulnerable === 0) {
             lives -= 1;
             invulnerable = 1.2;
             player.x = Math.max(0, player.x - 90);
@@ -385,7 +404,7 @@
           return;
         }
         if (player.x > worldWidth - 120) {
-          showMessage("ゴール！", `冒険クリア！ タイムは ${elapsed.toFixed(1)} 秒。`, "もう一度遊ぶ");
+          showMessage("ゴール！", `冒険クリア！ ${defeats}体のモンスターを倒した！ タイムは ${elapsed.toFixed(1)} 秒。`, "もう一度遊ぶ");
           return;
         }
 
@@ -407,9 +426,9 @@
         ctx.translate(-cameraX, 0);
 
         const sky = ctx.createLinearGradient(0, 0, 0, worldHeight);
-        sky.addColorStop(0, "#111638");
-        sky.addColorStop(0.58, "#24204e");
-        sky.addColorStop(1, "#382451");
+        sky.addColorStop(0, "#312344");
+        sky.addColorStop(0.58, "#51405b");
+        sky.addColorStop(1, "#8a5962");
         ctx.fillStyle = sky;
         ctx.fillRect(cameraX, 0, viewWidth, worldHeight);
 
@@ -420,7 +439,7 @@
           drawCloud(x, 95 + (i % 3) * 52);
         }
 
-        ctx.fillStyle = "#202c5c";
+        ctx.fillStyle = "#58405b";
         ctx.beginPath();
         ctx.moveTo(cameraX, 435);
         for (let x = Math.floor(cameraX / 260) * 260; x <= cameraX + viewWidth + 300; x += 260) {
@@ -431,22 +450,13 @@
         ctx.fill();
 
         for (const platform of platforms) {
-          const earth = ctx.createLinearGradient(0, platform.y, 0, platform.y + platform.h);
-          earth.addColorStop(0, "#303469");
-          earth.addColorStop(1, "#171b3b");
-          ctx.fillStyle = earth;
+          ctx.fillStyle = "#70445a";
           ctx.fillRect(platform.x, platform.y, platform.w, platform.h);
-          ctx.fillStyle = "#42f5e9";
-          ctx.shadowColor = "#42f5e9";
-          ctx.shadowBlur = 14;
-          ctx.fillRect(platform.x, platform.y, platform.w, 4);
-          ctx.shadowBlur = 0;
-          ctx.fillStyle = "#b44cff";
-          ctx.fillRect(platform.x, platform.y + 5, platform.w, 4);
-          ctx.fillStyle = "#82fff4";
-          for (let x = platform.x + 12; x < platform.x + platform.w; x += 34) {
-            ctx.fillRect(x, platform.y + 9, 3, 4);
-            ctx.fillRect(x + 5, platform.y + 13, 2, 3);
+          ctx.fillStyle = "#80a85a";
+          ctx.fillRect(platform.x, platform.y, platform.w, 8);
+          ctx.fillStyle = "#bfd17a";
+          for (let x = platform.x + 8; x < platform.x + platform.w; x += 24) {
+            ctx.fillRect(x, platform.y + 8, 4, 4);
           }
           ctx.save();
           ctx.beginPath();
@@ -454,18 +464,12 @@
           ctx.clip();
           for (let x = platform.x + 22; x < platform.x + platform.w - 14; x += 68) {
             const offset = Math.floor(x / 68) % 2 ? 12 : 0;
-            ctx.fillStyle = "#22284d";
-            ctx.beginPath();
-            ctx.ellipse(x + 14, platform.y + 31 + offset, 14, 7, -0.18, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.fillStyle = "#73509f";
-            ctx.beginPath();
-            ctx.ellipse(x + 12, platform.y + 29 + offset, 9, 3, -0.18, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.fillStyle = "#141a39";
-            ctx.beginPath();
-            ctx.ellipse(x + 39, platform.y + 53 - offset / 2, 10, 5, 0.12, 0, Math.PI * 2);
-            ctx.fill();
+            ctx.fillStyle = "#51354c";
+            ctx.fillRect(x + 5, platform.y + 26 + offset, 20, 8);
+            ctx.fillStyle = "#9b665d";
+            ctx.fillRect(x + 9, platform.y + 22 + offset, 12, 4);
+            ctx.fillStyle = "#392c45";
+            ctx.fillRect(x + 32, platform.y + 46 - offset / 2, 16, 7);
           }
           ctx.restore();
         }
@@ -484,21 +488,17 @@
             const seed = Math.abs(Math.sin(x * 12.9898 + row * 78.233));
             const starX = x + seed * 82;
             const starY = 24 + row * 61 + Math.abs(Math.sin(x * 0.03 + row)) * 25;
-            const pulse = 0.45 + Math.sin(elapsed * 2 + seed * 8) * 0.2;
-            ctx.globalAlpha = pulse;
-            ctx.fillStyle = row % 2 ? "#b991ff" : "#9bfff4";
-            ctx.beginPath();
-            ctx.arc(starX, starY, 1 + seed * 1.4, 0, Math.PI * 2);
-            ctx.fill();
+            ctx.fillStyle = row % 2 ? "#e4b567" : "#fff0c2";
+            const size = seed > 0.76 ? 4 : 2;
+            ctx.fillRect(Math.floor(starX / 3) * 3, Math.floor(starY / 3) * 3, size, size);
           }
         }
-        ctx.globalAlpha = 1;
       }
 
       function drawParallax(viewWidth) {
         const layers = [
-          { speed: 0.12, y: 390, step: 340, color: "#24275a" },
-          { speed: 0.28, y: 415, step: 250, color: "#30316c" }
+          { speed: 0.12, y: 390, step: 340, color: "#44364f" },
+          { speed: 0.28, y: 415, step: 250, color: "#58405b" }
         ];
         for (const layer of layers) {
           const offset = cameraX * layer.speed;
@@ -523,11 +523,7 @@
         ctx.translate(-islandOffset, 0);
         for (let x = Math.floor(islandOffset / 520) * 520 + 190; x < islandOffset + viewWidth + 520; x += 520) {
           const y = 248 + Math.sin(x) * 14;
-          ctx.fillStyle = "#a14cff33";
-          ctx.beginPath();
-          ctx.ellipse(x, y, 42, 10, 0, 0, Math.PI * 2);
-          ctx.fill();
-          ctx.fillStyle = "#4d4b91";
+          ctx.fillStyle = "#d79a68";
           ctx.beginPath();
           ctx.moveTo(x - 34, y + 2);
           ctx.lineTo(x + 34, y + 2);
@@ -541,12 +537,11 @@
       }
 
       function drawCloud(x, y) {
-        ctx.fillStyle = "#c0b4ff99";
-        ctx.beginPath();
-        ctx.arc(x, y + 15, 21, 0, Math.PI * 2);
-        ctx.arc(x + 25, y, 27, 0, Math.PI * 2);
-        ctx.arc(x + 53, y + 15, 20, 0, Math.PI * 2);
-        ctx.fill();
+        ctx.fillStyle = "#d9b9a3";
+        ctx.fillRect(x, y + 12, 52, 16);
+        ctx.fillRect(x + 12, y + 2, 28, 12);
+        ctx.fillStyle = "#f0d4ae";
+        ctx.fillRect(x + 7, y + 14, 36, 5);
       }
 
       function drawPlayer() {
@@ -556,71 +551,49 @@
         const x = player.x;
         const y = player.y + bob;
         const jumpPose = player.grounded ? 0 : Math.min(1, Math.abs(player.vy) / 650);
-        ctx.fillStyle = "#42f5e966";
+        ctx.fillStyle = "#15152688";
         ctx.beginPath();
-        ctx.ellipse(x + player.w / 2, player.y + player.h + 2, 18, 4, 0, 0, Math.PI * 2);
+        ctx.fillRect(x + 4, player.y + player.h, 24, 4);
         ctx.fill();
-        ctx.shadowColor = "#42f5e9";
-        ctx.shadowBlur = 16;
-        ctx.fillStyle = "#172950";
+        ctx.fillStyle = "#334c83";
         ctx.beginPath();
-        ctx.roundRect(x + 4, y + 17, 22, 22, 8);
+        ctx.rect(x + 4, y + 17, 22, 22);
         ctx.fill();
-        ctx.shadowBlur = 0;
-        ctx.strokeStyle = "#42f5e9";
-        ctx.lineWidth = 1.5;
-        ctx.stroke();
-        ctx.fillStyle = "#476cbb";
+        ctx.fillStyle = "#55759a";
         ctx.fillRect(x + 5, y + 25, 4, 12);
-        ctx.fillStyle = "#ff4d9d";
+        ctx.fillStyle = "#a64f5b";
         ctx.beginPath();
         ctx.moveTo(x + 7, y + 19);
-        ctx.quadraticCurveTo(x - 1, y + 24, x + 3 + Math.sin(elapsed * 9) * 2, y + 31);
+        ctx.lineTo(x - 1 + Math.round(Math.sin(elapsed * 9)) * 2, y + 30);
         ctx.lineTo(x + 12, y + 27);
         ctx.closePath();
         ctx.fill();
-        ctx.fillStyle = "#f4bd76";
+        ctx.fillStyle = "#e9ad76";
         ctx.beginPath();
-        ctx.ellipse(x + 16, y + 12, 10, 11, 0, 0, Math.PI * 2);
+        ctx.rect(x + 7, y + 4, 18, 16);
         ctx.fill();
-        ctx.fillStyle = "#7c51c7";
+        ctx.fillStyle = "#65445c";
         ctx.beginPath();
-        ctx.arc(x + 17, y + 10, 9, Math.PI, Math.PI * 2);
-        ctx.lineTo(x + 25, y + 13);
-        ctx.quadraticCurveTo(x + 16, y + 9, x + 8, y + 14);
+        ctx.rect(x + 7, y + 3, 18, 7);
+        ctx.rect(x + 4, y + 8, 23, 3);
         ctx.closePath();
         ctx.fill();
-        ctx.fillStyle = "#42f5e9";
-        ctx.beginPath();
-        ctx.ellipse(x + 16, y + 8, 12, 3, -0.08, Math.PI, Math.PI * 2);
-        ctx.fill();
-        ctx.fillStyle = "#ffffff";
-        ctx.beginPath();
-        ctx.arc(x + 20, y + 13, 3, 0, Math.PI * 2);
-        ctx.fill();
+        ctx.fillStyle = "#e4b567";
+        ctx.fillRect(x + 4, y + 7, 23, 3);
+        ctx.fillStyle = "#fff0c2";
+        ctx.fillRect(x + 19, y + 12, 4, 4);
         ctx.fillStyle = "#243044";
-        ctx.beginPath();
-        ctx.arc(x + 21, y + 13, 1.5, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.strokeStyle = "#9bfff4";
-        ctx.lineWidth = 2;
-        ctx.beginPath();
-        ctx.moveTo(x + 8, y + 23);
-        ctx.lineTo(x + 3, y + 27 - jumpPose * 3);
-        ctx.moveTo(x + 24, y + 23);
-        ctx.lineTo(x + 28, y + 26 - jumpPose * 3);
-        ctx.stroke();
-        ctx.fillStyle = "#ff4d9d";
-        ctx.beginPath();
-        ctx.ellipse(x + 9, y + 40 + Math.max(0, step), 7, 3, 0, 0, Math.PI * 2);
-        ctx.ellipse(x + 22, y + 40 + Math.max(0, -step), 7, 3, 0, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.fillStyle = "#ffe27a";
+        ctx.fillRect(x + 20, y + 13, 2, 3);
+        ctx.fillStyle = "#b98262";
+        ctx.fillRect(x + 7, y + 23, 4, 7 - jumpPose * 2);
+        ctx.fillRect(x + 24, y + 23, 4, 5 - jumpPose * 2);
+        ctx.fillStyle = "#a64f5b";
+        ctx.fillRect(x + 5, y + 37 + Math.max(0, step), 10, 5);
+        ctx.fillRect(x + 18, y + 37 + Math.max(0, -step), 10, 5);
+        ctx.fillStyle = "#f6d365";
         ctx.fillRect(x + 11, y + 20, 9, 3);
-        ctx.fillStyle = "#f4bd76";
-        ctx.beginPath();
-        ctx.arc(x + 16, y + 27, 2, 0, Math.PI * 2);
-        ctx.fill();
+        ctx.fillStyle = "#d98064";
+        ctx.fillRect(x + 15, y + 27, 3, 2);
       }
 
       function spawnParticles(x, y, count, color, spread, upwardSpeed) {
@@ -651,74 +624,57 @@
 
       function drawEnemy(enemy) {
         const palettes = [
-          { body: "#ff397a", light: "#ff9ac5", dark: "#7e255d", horn: "#ffe65c" },
-          { body: "#9b55ff", light: "#d4a5ff", dark: "#512f9a", horn: "#5ffff0" },
-          { body: "#ff873d", light: "#ffd17b", dark: "#a63f63", horn: "#ffef70" }
+          { body: "#c65b62", light: "#e98b70", dark: "#713c58", horn: "#f6d365" },
+          { body: "#7965a8", light: "#b69ac0", dark: "#443d70", horn: "#9dbd8a" },
+          { body: "#d8894f", light: "#f0bd72", dark: "#8a4b4c", horn: "#f6d365" }
         ];
         const palette = palettes[enemy.type];
         const bob = Math.sin(elapsed * 5 + enemy.x * 0.02) * 2;
         const x = enemy.x;
         const y = enemy.y + bob;
-        ctx.fillStyle = "#ff4d9d55";
+        ctx.fillStyle = "#15152688";
         ctx.beginPath();
-        ctx.ellipse(x + enemy.w / 2, enemy.y + enemy.h + 3, 17, 4, 0, 0, Math.PI * 2);
+        ctx.fillRect(x + 3, enemy.y + enemy.h + 1, 26, 4);
         ctx.fill();
-        ctx.shadowColor = palette.light;
-        ctx.shadowBlur = 16;
         ctx.fillStyle = palette.dark;
         ctx.beginPath();
         ctx.moveTo(x + 7, y + 12);
         ctx.lineTo(x + 3, y + 2);
-        ctx.quadraticCurveTo(x + 13, y + 3, x + 14, y + 11);
+        ctx.lineTo(x + 14, y + 8);
         ctx.moveTo(x + 19, y + 11);
-        ctx.quadraticCurveTo(x + 21, y + 3, x + 30, y + 2);
+        ctx.lineTo(x + 20, y + 8);
         ctx.lineTo(x + 26, y + 14);
         ctx.fill();
         ctx.fillStyle = palette.body;
-        ctx.beginPath();
-        ctx.ellipse(x + 16, y + 18, 15, 12, 0, Math.PI, Math.PI * 2);
-        ctx.lineTo(x + 31, y + 25);
-        ctx.quadraticCurveTo(x + 28, y + 31, x + 24, y + 27);
-        ctx.quadraticCurveTo(x + 18, y + 32, x + 13, y + 27);
-        ctx.quadraticCurveTo(x + 7, y + 32, x + 2, y + 25);
-        ctx.closePath();
-        ctx.fill();
+        ctx.fillRect(x + 3, y + 12, 26, 13);
+        ctx.fillRect(x + 7, y + 8, 18, 18);
+        ctx.fillRect(x + 5, y + 25, 6, 4);
+        ctx.fillRect(x + 14, y + 25, 6, 4);
+        ctx.fillRect(x + 23, y + 25, 6, 4);
         ctx.fillStyle = palette.light;
-        ctx.beginPath();
-        ctx.ellipse(x + 11, y + 13, 5, 3, -0.4, 0, Math.PI * 2);
-        ctx.ellipse(x + 22, y + 13, 5, 3, 0.4, 0, Math.PI * 2);
-        ctx.fill();
+        ctx.fillRect(x + 8, y + 11, 5, 3);
+        ctx.fillRect(x + 20, y + 11, 5, 3);
         ctx.fillStyle = "#fff4e8";
-        ctx.beginPath();
-        ctx.ellipse(x + 11, y + 19, 4, 5, 0, 0, Math.PI * 2);
-        ctx.ellipse(x + 22, y + 19, 4, 5, 0, 0, Math.PI * 2);
-        ctx.fill();
+        ctx.fillRect(x + 9, y + 16, 5, 6);
+        ctx.fillRect(x + 20, y + 16, 5, 6);
         ctx.fillStyle = palette.dark;
-        ctx.beginPath();
-        ctx.arc(x + 12, y + 20, 1.7, 0, Math.PI * 2);
-        ctx.arc(x + 23, y + 20, 1.7, 0, Math.PI * 2);
-        ctx.fill();
+        ctx.fillRect(x + 11, y + 18, 2, 3);
+        ctx.fillRect(x + 22, y + 18, 2, 3);
         ctx.fillStyle = palette.horn;
-        ctx.beginPath();
-        ctx.arc(x + 16, y + 27, 2, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.shadowBlur = 0;
+        ctx.fillRect(x + 15, y + 25, 3, 3);
       }
 
       function drawGoal() {
-        ctx.shadowColor = "#42f5e9";
-        ctx.shadowBlur = 18;
-        ctx.fillStyle = "#a9fff9";
-        ctx.fillRect(worldWidth - 125, 322, 7, 118);
-        ctx.fillStyle = "#ff4d9d";
+        ctx.fillStyle = "#e4b567";
+        ctx.fillRect(worldWidth - 125, 322, 6, 118);
+        ctx.fillStyle = "#c65b62";
         ctx.beginPath();
         ctx.moveTo(worldWidth - 118, 325);
         ctx.lineTo(worldWidth - 62, 341);
         ctx.lineTo(worldWidth - 118, 360);
         ctx.closePath();
         ctx.fill();
-        ctx.shadowBlur = 0;
-        ctx.fillStyle = "#ffe65c";
+        ctx.fillStyle = "#f6d365";
         ctx.beginPath();
         ctx.arc(worldWidth - 121.5, 319, 7, 0, Math.PI * 2);
         ctx.fill();
