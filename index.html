@@ -255,6 +255,7 @@
       let lastTime = 0;
       let elapsed = 0;
       let invulnerable = 0;
+      let particles = [];
 
       function resizeCanvas() {
         const rect = canvas.getBoundingClientRect();
@@ -275,12 +276,14 @@
         lives = 3;
         invulnerable = 0;
         elapsed = 0;
+        particles = [];
         enemies = enemySpawns.map((enemy, index) => ({
           ...enemy,
           x: enemy.x,
           y: enemy.y,
           w: 32,
           h: 30,
+          type: index % 3,
           direction: index % 2 === 0 ? 1 : -1
         }));
         updateHud();
@@ -314,11 +317,20 @@
       function update(dt) {
         elapsed += dt;
         invulnerable = Math.max(0, invulnerable - dt);
+        particles = particles.filter((particle) => {
+          particle.life -= dt;
+          particle.x += particle.vx * dt;
+          particle.y += particle.vy * dt;
+          particle.vy += 420 * dt;
+          return particle.life > 0;
+        });
         const left = keys.has("ArrowLeft") || keys.has("KeyA");
         const right = keys.has("ArrowRight") || keys.has("KeyD");
         player.vx = (Number(right) - Number(left)) * 270;
+        const wasGrounded = player.grounded;
 
         if ((keys.has("Space") || keys.has("ArrowUp") || keys.has("KeyW")) && player.grounded) {
+          spawnParticles(player.x + player.w / 2, player.y + player.h, 8, "#fff1b0", 95, 25);
           player.vy = -650;
           player.grounded = false;
         }
@@ -342,6 +354,9 @@
             player.y = platform.y - player.h;
             player.vy = 0;
             player.grounded = true;
+            if (!wasGrounded) {
+              spawnParticles(player.x + player.w / 2, platform.y, 10, "#d8f1a4", 120, 35);
+            }
           }
         }
 
@@ -393,6 +408,7 @@
         ctx.fillStyle = sky;
         ctx.fillRect(cameraX, 0, viewWidth, worldHeight);
 
+        drawParallax(viewWidth);
         for (let i = 0; i < 9; i += 1) {
           const x = i * 380 + 50 - (cameraX * 0.22) % 380;
           drawCloud(x, 95 + (i % 3) * 52);
@@ -409,20 +425,92 @@
         ctx.fill();
 
         for (const platform of platforms) {
-          ctx.fillStyle = "#60463e";
+          const earth = ctx.createLinearGradient(0, platform.y, 0, platform.y + platform.h);
+          earth.addColorStop(0, "#795544");
+          earth.addColorStop(1, "#493b49");
+          ctx.fillStyle = earth;
           ctx.fillRect(platform.x, platform.y, platform.w, platform.h);
-          ctx.fillStyle = "#69b86c";
-          ctx.fillRect(platform.x, platform.y, platform.w, 11);
-          ctx.fillStyle = "#91d580";
+          ctx.fillStyle = "#4b8e65";
+          ctx.fillRect(platform.x, platform.y + 8, platform.w, 6);
+          ctx.fillStyle = "#79c878";
+          ctx.fillRect(platform.x, platform.y, platform.w, 9);
+          ctx.fillStyle = "#b0e38a";
           for (let x = platform.x + 12; x < platform.x + platform.w; x += 34) {
-            ctx.fillRect(x, platform.y + 11, 4, Math.min(12, platform.h - 11));
+            ctx.fillRect(x, platform.y + 9, 3, 4);
+            ctx.fillRect(x + 5, platform.y + 13, 2, 3);
           }
+          ctx.save();
+          ctx.beginPath();
+          ctx.rect(platform.x, platform.y + 15, platform.w, platform.h - 15);
+          ctx.clip();
+          for (let x = platform.x + 22; x < platform.x + platform.w - 14; x += 68) {
+            const offset = Math.floor(x / 68) % 2 ? 12 : 0;
+            ctx.fillStyle = "#62484a";
+            ctx.beginPath();
+            ctx.ellipse(x + 14, platform.y + 31 + offset, 14, 7, -0.18, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.fillStyle = "#96705d";
+            ctx.beginPath();
+            ctx.ellipse(x + 12, platform.y + 29 + offset, 9, 3, -0.18, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.fillStyle = "#403d4b";
+            ctx.beginPath();
+            ctx.ellipse(x + 39, platform.y + 53 - offset / 2, 10, 5, 0.12, 0, Math.PI * 2);
+            ctx.fill();
+          }
+          ctx.restore();
         }
 
         drawGoal();
         for (const enemy of enemies) drawEnemy(enemy);
+        drawParticles();
         if (invulnerable === 0 || Math.floor(performance.now() / 90) % 2 === 0) drawPlayer();
 
+        ctx.restore();
+      }
+
+      function drawParallax(viewWidth) {
+        const layers = [
+          { speed: 0.12, y: 390, step: 340, color: "#9ccbbf" },
+          { speed: 0.28, y: 415, step: 250, color: "#72ad9d" }
+        ];
+        for (const layer of layers) {
+          const offset = cameraX * layer.speed;
+          ctx.save();
+          ctx.translate(-offset, 0);
+          ctx.fillStyle = layer.color;
+          ctx.beginPath();
+          ctx.moveTo(offset, layer.y + 70);
+          for (let x = Math.floor(offset / layer.step) * layer.step; x <= offset + viewWidth + layer.step; x += layer.step) {
+            ctx.lineTo(x + layer.step * 0.48, layer.y - (x / layer.step % 2 ? 42 : 12));
+            ctx.lineTo(x + layer.step, layer.y + 70);
+          }
+          ctx.lineTo(offset + viewWidth, worldHeight);
+          ctx.lineTo(offset, worldHeight);
+          ctx.closePath();
+          ctx.fill();
+          ctx.restore();
+        }
+
+        const islandOffset = cameraX * 0.38;
+        ctx.save();
+        ctx.translate(-islandOffset, 0);
+        for (let x = Math.floor(islandOffset / 520) * 520 + 190; x < islandOffset + viewWidth + 520; x += 520) {
+          const y = 248 + Math.sin(x) * 14;
+          ctx.fillStyle = "#ffffff80";
+          ctx.beginPath();
+          ctx.ellipse(x, y, 42, 10, 0, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.fillStyle = "#78a99c";
+          ctx.beginPath();
+          ctx.moveTo(x - 34, y + 2);
+          ctx.lineTo(x + 34, y + 2);
+          ctx.lineTo(x + 15, y + 18);
+          ctx.lineTo(x + 5, y + 34);
+          ctx.lineTo(x - 12, y + 17);
+          ctx.closePath();
+          ctx.fill();
+        }
         ctx.restore();
       }
 
@@ -436,30 +524,150 @@
       }
 
       function drawPlayer() {
+        const moving = player.grounded && Math.abs(player.vx) > 0;
+        const step = moving ? Math.sin(elapsed * 18) * 4 : 0;
+        const bob = player.grounded ? (moving ? Math.abs(step) * -0.45 : 0) : -2;
+        const x = player.x;
+        const y = player.y + bob;
+        const jumpPose = player.grounded ? 0 : Math.min(1, Math.abs(player.vy) / 650);
+        ctx.fillStyle = "#416d74";
+        ctx.beginPath();
+        ctx.ellipse(x + player.w / 2, player.y + player.h + 2, 18, 4, 0, 0, Math.PI * 2);
+        ctx.fill();
         ctx.fillStyle = "#243a69";
-        ctx.fillRect(player.x + 3, player.y + 13, player.w - 6, player.h - 13);
-        ctx.fillStyle = "#ffcf70";
-        ctx.fillRect(player.x + 6, player.y, player.w - 12, 20);
-        ctx.fillStyle = "#ffffff";
-        ctx.fillRect(player.x + 17, player.y + 7, 5, 6);
-        ctx.fillStyle = "#1c2b49";
-        ctx.fillRect(player.x + 19, player.y + 9, 3, 4);
+        ctx.beginPath();
+        ctx.roundRect(x + 4, y + 17, 22, 22, 8);
+        ctx.fill();
+        ctx.fillStyle = "#456ca4";
+        ctx.fillRect(x + 5, y + 25, 4, 12);
+        ctx.fillStyle = "#c94f63";
+        ctx.beginPath();
+        ctx.moveTo(x + 7, y + 19);
+        ctx.quadraticCurveTo(x - 1, y + 24, x + 3 + Math.sin(elapsed * 9) * 2, y + 31);
+        ctx.lineTo(x + 12, y + 27);
+        ctx.closePath();
+        ctx.fill();
+        ctx.fillStyle = "#f4bd76";
+        ctx.beginPath();
+        ctx.ellipse(x + 16, y + 12, 10, 11, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = "#b96d57";
+        ctx.beginPath();
+        ctx.arc(x + 17, y + 10, 9, Math.PI, Math.PI * 2);
+        ctx.lineTo(x + 25, y + 13);
+        ctx.quadraticCurveTo(x + 16, y + 9, x + 8, y + 14);
+        ctx.closePath();
+        ctx.fill();
+        ctx.fillStyle = "#ffd166";
+        ctx.beginPath();
+        ctx.ellipse(x + 16, y + 8, 12, 3, -0.08, Math.PI, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = "#fff8df";
+        ctx.beginPath();
+        ctx.arc(x + 20, y + 13, 3, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = "#243044";
+        ctx.beginPath();
+        ctx.arc(x + 21, y + 13, 1.5, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.strokeStyle = "#d89761";
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(x + 8, y + 23);
+        ctx.lineTo(x + 3, y + 27 - jumpPose * 3);
+        ctx.moveTo(x + 24, y + 23);
+        ctx.lineTo(x + 28, y + 26 - jumpPose * 3);
+        ctx.stroke();
         ctx.fillStyle = "#e98965";
-        ctx.fillRect(player.x + 2, player.y + 37, 12, 5);
-        ctx.fillRect(player.x + 17, player.y + 37, 12, 5);
+        ctx.beginPath();
+        ctx.ellipse(x + 9, y + 40 + Math.max(0, step), 7, 3, 0, 0, Math.PI * 2);
+        ctx.ellipse(x + 22, y + 40 + Math.max(0, -step), 7, 3, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = "#f7dc9b";
+        ctx.fillRect(x + 11, y + 20, 9, 3);
+        ctx.fillStyle = "#f4bd76";
+        ctx.beginPath();
+        ctx.arc(x + 16, y + 27, 2, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      function spawnParticles(x, y, count, color, spread, upwardSpeed) {
+        for (let i = 0; i < count; i += 1) {
+          particles.push({
+            x,
+            y,
+            vx: (Math.random() - 0.5) * spread * 2,
+            vy: -Math.random() * 100 - upwardSpeed,
+            life: 0.35 + Math.random() * 0.3,
+            maxLife: 0.65,
+            size: 2 + Math.random() * 3,
+            color
+          });
+        }
+      }
+
+      function drawParticles() {
+        for (const particle of particles) {
+          ctx.globalAlpha = particle.life / particle.maxLife;
+          ctx.fillStyle = particle.color;
+          ctx.beginPath();
+          ctx.arc(particle.x, particle.y, particle.size, 0, Math.PI * 2);
+          ctx.fill();
+        }
+        ctx.globalAlpha = 1;
       }
 
       function drawEnemy(enemy) {
-        ctx.fillStyle = "#c94f63";
+        const palettes = [
+          { body: "#c94f63", light: "#ff9a8d", dark: "#7f385f", horn: "#ffe28a" },
+          { body: "#7956b3", light: "#c2a0ff", dark: "#493d84", horn: "#8de6d0" },
+          { body: "#e58b43", light: "#ffd17b", dark: "#9c4f50", horn: "#f6edbd" }
+        ];
+        const palette = palettes[enemy.type];
+        const bob = Math.sin(elapsed * 5 + enemy.x * 0.02) * 2;
+        const x = enemy.x;
+        const y = enemy.y + bob;
+        ctx.fillStyle = "#416d7466";
         ctx.beginPath();
-        ctx.roundRect(enemy.x, enemy.y + 5, enemy.w, enemy.h - 5, 10);
+        ctx.ellipse(x + enemy.w / 2, enemy.y + enemy.h + 3, 17, 4, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = palette.dark;
+        ctx.beginPath();
+        ctx.moveTo(x + 7, y + 12);
+        ctx.lineTo(x + 3, y + 2);
+        ctx.quadraticCurveTo(x + 13, y + 3, x + 14, y + 11);
+        ctx.moveTo(x + 19, y + 11);
+        ctx.quadraticCurveTo(x + 21, y + 3, x + 30, y + 2);
+        ctx.lineTo(x + 26, y + 14);
+        ctx.fill();
+        ctx.fillStyle = palette.body;
+        ctx.beginPath();
+        ctx.ellipse(x + 16, y + 18, 15, 12, 0, Math.PI, Math.PI * 2);
+        ctx.lineTo(x + 31, y + 25);
+        ctx.quadraticCurveTo(x + 28, y + 31, x + 24, y + 27);
+        ctx.quadraticCurveTo(x + 18, y + 32, x + 13, y + 27);
+        ctx.quadraticCurveTo(x + 7, y + 32, x + 2, y + 25);
+        ctx.closePath();
+        ctx.fill();
+        ctx.fillStyle = palette.light;
+        ctx.beginPath();
+        ctx.ellipse(x + 11, y + 13, 5, 3, -0.4, 0, Math.PI * 2);
+        ctx.ellipse(x + 22, y + 13, 5, 3, 0.4, 0, Math.PI * 2);
         ctx.fill();
         ctx.fillStyle = "#fff4e8";
-        ctx.fillRect(enemy.x + 8, enemy.y + 12, 5, 7);
-        ctx.fillRect(enemy.x + 20, enemy.y + 12, 5, 7);
-        ctx.fillStyle = "#522d4a";
-        ctx.fillRect(enemy.x + 10, enemy.y + 14, 3, 4);
-        ctx.fillRect(enemy.x + 22, enemy.y + 14, 3, 4);
+        ctx.beginPath();
+        ctx.ellipse(x + 11, y + 19, 4, 5, 0, 0, Math.PI * 2);
+        ctx.ellipse(x + 22, y + 19, 4, 5, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = palette.dark;
+        ctx.beginPath();
+        ctx.arc(x + 12, y + 20, 1.7, 0, Math.PI * 2);
+        ctx.arc(x + 23, y + 20, 1.7, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = palette.horn;
+        ctx.beginPath();
+        ctx.arc(x + 16, y + 27, 2, 0, Math.PI * 2);
+        ctx.fill();
       }
 
       function drawGoal() {
